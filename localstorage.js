@@ -250,5 +250,3 @@ LocalStorage.Driver.prototype = {
 };
 
 LocalStorage.drivers = {};
-
-LocalStorage.init(); /* Инициализацию можно вынести и в другое место */
