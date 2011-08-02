@@ -1,0 +1,1 @@
+My personal static site
