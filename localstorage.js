@@ -1,5 +1,5 @@
 /**
- * Библиотека, реализующая кроссбраузерно хранилище данных на клиенте
+ * Библиотека, реализующая хранилище данных на клиенте
  */
 var LocalStorage = (function() {
     var self = {},          /* Ссылка на себя */
@@ -35,6 +35,7 @@ var LocalStorage = (function() {
      * @return  в случае, если ключ не был задан возвращает undefined
      */
     function get(key) {
+        key = LocalStorage.config.namespace + '_' + key;
         var ret = driver.get(key);
 
         if ( ! ret) {
@@ -62,7 +63,7 @@ var LocalStorage = (function() {
      */
     function set(key, value, period) {
         period = parseInt(period || 0);
-        key += '';
+        key = LocalStorage.config.namespace + '_' + key;
 
         var now = (new Date).getTime();
 
@@ -87,8 +88,10 @@ var LocalStorage = (function() {
         for (var i = 0; i < list.length; ++i) {
             var item = list[i];
 
-            if (item.value && item.value.expires && now > item.value.expires) {
-                driver.remove(item.key);
+            if (item.key.indexOf(LocalStorage.config.namespace + '_') == 0
+                && item.value && item.value.expires
+                && now > item.value.expires) {
+                    driver.remove(item.key);
             }
         }
     }
@@ -119,7 +122,8 @@ var LocalStorage = (function() {
 
 
 LocalStorage.config = {
-    driversPriority : ['DOM', 'IE', 'Flash'] /* Приоритет при выботе драйвера */
+    driversPriority : ['DOM', 'IE', 'Flash'], /* Приоритет при выборе драйвера */
+    namespace       : 'ls'                    /* Namespace дла ключей */
 };
 
 /**
@@ -146,7 +150,7 @@ LocalStorage.Driver.prototype = {
      * @return {String}
      */
     stringify : function self(o) {
-        if (JSON && JSON.stringify) {
+        if (window.JSON && JSON.stringify) {
             return JSON.stringify(o);
         }
 
@@ -165,9 +169,8 @@ LocalStorage.Driver.prototype = {
         }
 
         /* Array */
+        var ret = [];
         if (type != 'function' && typeof(obj.length) == 'number') {
-            var ret = [];
-
             for (var i = 0; i < o.length; ++i) {
                 ret.push(self(o[i]));
             }
@@ -178,8 +181,6 @@ LocalStorage.Driver.prototype = {
         if (type == 'function') {
             throw new TypeError('Unable to convert object of type "function" to json.');
         }
-
-        var ret = [];
 
         for (var k in o) if (o.hasOwnProperty(k)) {
             ret.push('"' + k + '"' + ':' + self(o[k]));
@@ -201,164 +202,53 @@ LocalStorage.Driver.prototype = {
             ret = null;
         }
         return ret;
-    }
-};
-
-LocalStorage.drivers = {};
-
-/**
- * Драйвер для современных броузеров, поддерживающих стандарт HTML5
- */
-LocalStorage.drivers['DOM_driver'] = {
-    _storage : null,
-
-    type : 'DOM',
+    },
 
     /**
      * Проверка доступности драйвера
      * @return {Boolean}
      */
     check : function() {
-        return !!(window.localStorage
-            || window.globalStorage /* для FF lt 4 */);
+        return false;
     },
 
     /**
      * Инициализяция драйвера
      */
-    init : function() {
-        this._storage = window.localStorage
-            || (window.globalStorage && window.globalStorage[document.domain] /* для FF lt 4 */);
-    },
+    init : function() {},
 
     /**
      * Получение значения по ключу
      * @param {String} key
      * @return в случае, если ключ не был задан возвращает undefined
      */
-    get : function(key) {
-        key += '';
-        return this.parseJSON(this._storage[key]);
-    },
+    get : function(key) {},
 
     /**
      * Установка зачения ключа
      * @param {String} key
      * @param value
      */
-    set : function(key, value) {
-        key += '';
-        this._storage[key] = this.stringify(value);
-    },
+    set : function(key, value) {},
 
     /**
      * Удаление ключа
      * @param key
      */
-    remove : function(key) {
-        key += '';
-        delete this._storage[key];
-    },
+    remove : function(key) {},
 
     /**
      * Получение всех ключей
      * @return {Array}
      */
-    getAll : function() {
-        var ret = [];
-
-        for (var key in this._storage) if (this._storage.hasOwnProperty(key)) {
-            ret.push({
-                key   : key,
-                value : this.parseJSON(this._storage[key])
-            });
-        }
-        return ret;
-    },
+    getAll : function() {},
 
     /**
      * Удаление всех ключей
      */
-    removeAll : function() {
-        for (var key in this._storage) if (this._storage.hasOwnProperty(key)) {
-            delete this._storage[key];
-        }
-    }
+    removeAll : function() {}
 };
 
-/**
- * Драйвер для броузеров IE lt 8, поддерживающих userData
- */
-LocalStorage.drivers['IE_driver'] = {
-    _storage : null,
+LocalStorage.drivers = {};
 
-    type : 'IE',
-
-    check : function() {
-        return !!window.ActiveXObject;
-    },
-
-    init : function() {
-        var elm = document.createElement('div');
-
-        elm.style.display = 'none';
-        elm.id = 'LocalStorageElement';
-        document.body.appendChild(elm);
-        elm.addBehavior('#default#userData');
-        elm.load('namespace');
-        this._storage = elm;
-    },
-
-    get : function(key) {
-        key += '';
-        return this.parseJSON(this._storage.getAttribute(key));
-    },
-
-    set : function(key, value) {
-        key += '';
-        value = this.stringify(value);
-        this._storage.setAttribute(key, value);
-        this._storage.save('namespace');
-    },
-
-    remove : function(key) {
-        key += '';
-        this._storage.removeAttribute(key);
-        this._storage.save('namespace');
-    },
-
-    getAll : function() {
-        var ret = [],
-            attrs = this._storage.XMLDocument.documentElement.attributes;
-
-        for (var i = 0; i < attrs.length; ++i) {
-            ret.push({
-                key   : attrs[i].name,
-                value : this.parseJSON(attrs[i].value)
-            });
-        }
-        return ret;
-    },
-
-    removeAll : function() {
-        var attrs = this._storage.XMLDocument.documentElement.attributes;
-
-        for(var i = 0; i < attrs.length; ++i) {
-            this['delete'](attrs.name);
-        }
-    }
-};
-
-/**
- * Драйвер для броузеров, поддерживающих flash
- */
-LocalStorage.drivers['Flash_driver'] = {
-    type : 'Flash',
-    
-    check : function() {
-        return false;
-    }
-};
-
-/* Хуже не будет если инициадизацию провести прямо здесь */
-//LocalStorage.init();
+LocalStorage.init(); /* Инициализацию можно вынести и в другое место */
