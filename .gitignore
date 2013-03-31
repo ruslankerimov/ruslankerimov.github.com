@@ -1,0 +1,7 @@
+.idea
+bem-bl
+node_modules
+pages/*/*.css*
+pages/*/*.js*
+!*.bemjson.js
+pages/*/*.html

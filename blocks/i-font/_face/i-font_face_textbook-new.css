@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'TextbookNew';
+    src: url('TextbookNew');
+    src: url('blocks/i-font/_face/i-font_face_textbook-new.woff'),
+         url('blocks/i-font/_face/i-font_face_textbook-new.ttf');
+}
+
+.i-font_face_textbook-new {
+    font-family: 'TextbookNew', Arial, sans-serif !important;
+}

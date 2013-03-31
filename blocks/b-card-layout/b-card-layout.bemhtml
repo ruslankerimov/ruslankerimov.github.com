@@ -1,0 +1,32 @@
+block b-card-layout {
+
+    mix: [{
+        block: 'b-card',
+        elem: 'side',
+        mods: {
+            lang: this.ctx.lang,
+            state: (this.ctx.lang == this.i18n.lang) ? 'opened' : ''
+        }
+    }]
+
+    content: [
+        {
+            elem: 'left',
+            content: {
+                elem: 'text',
+                content: {
+                    block: 'b-info',
+                    lang: this.ctx.lang,
+                    info: this.ctx.info
+                }
+            }
+        },
+        { elem: 'top', tag: 'i', content: { elem: 'arrow', content: { elem: 'shape' } } },
+        { elem: 'bottom', tag: 'i', content: { elem: 'arrow', content: { elem: 'shape' } } }
+    ]
+
+    elem arrow, tag: 'i'
+
+    elem shape, tag: 'i'
+
+}

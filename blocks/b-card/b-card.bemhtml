@@ -1,0 +1,39 @@
+block b-card {
+
+    js: true
+
+    content: [
+        { elem: 'switch' },
+        this.ctx.content
+    ]
+
+    elem switch {
+        content: {
+
+            var c = [];
+
+            for(var i = this.i18n.langs.length; i--;) {
+                var mods = {
+                        lang: this.i18n.langs[i],
+                        pseudo: 'yes'
+                    };
+                if(this.i18n.langs[i] == this.i18n.lang) {
+                    mods.disabled = 'yes';
+                    mods.current = 'yes';
+                }
+
+                c.unshift({
+                    block: 'b-link',
+                    mods: mods,
+                    js: true,
+                    content: this.i18n.langs[i]
+                });
+            }
+
+            return c;
+
+        }
+
+    }
+
+}
