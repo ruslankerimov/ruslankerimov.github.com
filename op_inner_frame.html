@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <title>Op inner frame</title>
+      <script>
+        window.parent.postMessage({ 
+          status: 'error',
+          errors: [
+            'opa'
+          ]
+        }, '*');
+    </script>
+  </head>
+  <body></body>
+</html>
