@@ -3,7 +3,11 @@
 </head>
 <body>
   <script>
-alert(1);
+    window.parent.postMessage({ 
+      errors: [
+        'opa'
+      ]
+    }, '*')
   </script>
 </body>
 </html>
