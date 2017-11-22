@@ -5,7 +5,7 @@
         window.parent.postMessage({ 
           status: 'error',
           errors: [
-            '<script>alert(1);</script>'
+            '<script' + '>alert(1);</' + 'script>'
           ]
         }, '*');
     </script>
